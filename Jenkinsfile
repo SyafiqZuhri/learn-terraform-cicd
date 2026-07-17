@@ -25,4 +25,22 @@ pipeline {
             }
         }
     }
+    
+    // Blok ini akan mengirim Email Notifikasi otomatis
+    post {
+        success {
+            script {
+                mail to: 'GANTI_DENGAN_EMAIL_KAMU@gmail.com', // <--- UBAH INI
+                     subject: "SUCCESS: Jenkins Pipeline ${currentBuild.fullDisplayName}",
+                     body: "Halo,\n\nPipeline untuk infrastruktur Terraform telah berhasil dieksekusi dengan aman.\n\nCek log lengkapnya di sini: ${env.BUILD_URL}"
+            }
+        }
+        failure {
+            script {
+                mail to: 'GANTI_DENGAN_EMAIL_KAMU@gmail.com', // <--- UBAH INI
+                     subject: "FAILED: Jenkins Pipeline ${currentBuild.fullDisplayName}",
+                     body: "Peringatan!\n\nPipeline infrastruktur GAGAL dieksekusi. Segera periksa log error di Jenkins untuk investigasi lebih lanjut:\n\n${env.BUILD_URL}"
+            }
+        }
+    }
 }
