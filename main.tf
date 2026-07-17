@@ -2,6 +2,11 @@
 # 1. PROVIDER & PENGATURAN DASAR
 # =========================================================
 terraform {
+  backend "gcs" {
+    bucket = "my-terraform-state-bucket"
+    prefix = "terraform/state"
+  }
+
   required_providers {
     google = {
       source  = "hashicorp/google"
@@ -15,7 +20,7 @@ terraform {
 }
 
 provider "google" {
-  project = "tab-dev-playground" # Sesuaikan dengan Project ID di Google Cloud
+  project = "tab-dev-playground" # Sesuaikan jika Project ID kamu berbeda
   region  = "asia-southeast2"
   zone    = "asia-southeast2-a"
 }
