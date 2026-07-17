@@ -4,7 +4,7 @@ terraform {
     kubernetes = { source = "hashicorp/kubernetes", version = "~> 2.0" }
   }
   backend "gcs" {
-    bucket = "bucket-state-terraform-zuhri-99"
+    bucket = "my-terraform-state-bucket"
     prefix = "terraform/state-gke"
   }
 }
@@ -34,28 +34,55 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(google_container_cluster.primary.master_auth[0].cluster_ca_certificate)
 }
 
-# 3. Deployment Aplikasi
+# --- BLOK APLIKASI (DEPLOYMENT) ---
 resource "kubernetes_deployment" "app_web_zuhri" {
-  depends_on = [google_container_cluster.primary] # KUNCI UTAMA: Tunggu cluster jadi dulu
   metadata {
     name = "web-deployment-zuhri"
   }
+
   spec {
-    replicas = 2
-    selector { match_labels = { app = "web" } }
+    replicas = 2 # Kita jalankan 2 server Nginx sekaligus biar aman
+    selector {
+      match_labels = {
+        app = "nginx-web"
+      }
+    }
     template {
-      metadata { labels = { app = "web" } }
+      metadata {
+        labels = {
+          app = "nginx-web"
+        }
+      }
       spec {
         container {
+          image = "nginx:latest"
           name  = "nginx-container"
-          image = "nginx:alpine"
-          port { container_port = 80 }
+          port {
+            container_port = 80
+          }
         }
       }
     }
   }
 }
 
+# --- BLOK JALAN MASUK (SERVICE / LOAD BALANCER) ---
+resource "kubernetes_service" "service_web_zuhri" {
+  metadata {
+    name = "web-service-zuhri"
+  }
+  spec {
+    selector = {
+      app = "kubernetes_deployment.app_web_zuhri.spec.0.template.0.metadata.0.labels.app"
+      app = "nginx-web" # Harus sama dengan label di atas
+    }
+    port {
+      port        = 80
+      target_port = 80
+    }
+    type = "LoadBalancer" # Ini kunci utama agar bisa diakses dari internet!
+  }
+}
 # 4. Service Aplikasi
 resource "kubernetes_service" "service_web_zuhri" {
   depends_on = [google_container_cluster.primary] # KUNCI UTAMA: Tunggu cluster jadi dulu
