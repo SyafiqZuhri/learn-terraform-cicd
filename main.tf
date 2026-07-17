@@ -3,7 +3,9 @@
 # =========================================================
 terraform {
   backend "gcs" {
-    bucket = "my-terraform-state-bucket"
+    # 👇👇👇 UBAH BAGIAN INI DENGAN NAMA BUCKET ASLIMU 👇👇👇
+    bucket = "bucket-state-terraform-zuhri-99" 
+    # 👆👆👆 UBAH BAGIAN INI DENGAN NAMA BUCKET ASLIMU 👆👆👆
     prefix = "terraform/state"
   }
 
